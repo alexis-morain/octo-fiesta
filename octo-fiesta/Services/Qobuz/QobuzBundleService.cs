@@ -88,6 +88,19 @@ public class QobuzBundleService
                 return;
             }
 
+            // Custom override: if Qobuz__AppId and Qobuz__AppSecret are provided via
+            // environment, use them directly and skip scraping the play.qobuz.com bundle.
+            // This lets us use a user_auth_token bound to a non-web-player app.
+            var overrideAppId = System.Environment.GetEnvironmentVariable("Qobuz__AppId");
+            var overrideSecret = System.Environment.GetEnvironmentVariable("Qobuz__AppSecret");
+            if (!string.IsNullOrWhiteSpace(overrideAppId) && !string.IsNullOrWhiteSpace(overrideSecret))
+            {
+                _cachedAppId = overrideAppId;
+                _cachedSecrets = new List<string> { overrideSecret };
+                _logger.LogInformation("Using configured Qobuz App ID {AppId} (bundle extraction skipped)", overrideAppId);
+                return;
+            }
+
             _logger.LogInformation("Extracting Qobuz App ID and secrets from web bundle...");
 
             // Step 1: Get the bundle URL from login page
