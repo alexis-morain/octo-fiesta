@@ -129,7 +129,9 @@ public class SubsonicController : ControllerBase
 
         var subsonicResult = await subsonicTask;
         var externalResult = await externalTask;
-        var playlistResult = await playlistTask;
+        // The provider pads playlist search with unrelated results rather than
+        // returning nothing, and they land in the album section. Drop the padding.
+        var playlistResult = PlaylistRelevanceFilter.Apply(cleanQuery, await playlistTask);
 
         return MergeSearchResults(subsonicResult, externalResult, playlistResult, format);
     }
